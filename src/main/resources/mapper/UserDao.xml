@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.peak.dao.UserDao">
+  <resultMap id="BaseResultMap" type="com.peak.pojo.User">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="type" jdbcType="BOOLEAN" property="type" />
+    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <!--根据账号和密码查找用户-->
+    <select id="queryByUsernameAndPassword" resultMap="BaseResultMap">
+        select * from t_user u where u.username = #{username} and u.password = #{password};
+    </select>
+
+
+</mapper>

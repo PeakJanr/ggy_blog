@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.peak.dao.BlogDao">
+  <resultMap id="blog" type="com.peak.pojo.Blog">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="first_picture" jdbcType="VARCHAR" property="firstPicture" />
+    <result column="flag" jdbcType="VARCHAR" property="flag" />
+    <result column="views" jdbcType="INTEGER" property="views" />
+    <result column="apperation" jdbcType="BOOLEAN" property="apperation" />
+    <result column="share_statement" jdbcType="BOOLEAN" property="shareStatement" />
+    <result column="commentalbled" jdbcType="BOOLEAN" property="commentalbled" />
+    <result column="published" jdbcType="BOOLEAN" property="published" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="tag_ids" jdbcType="VARCHAR" property="tagIds"/>
+    <result column="description" jdbcType="VARCHAR" property="description"/>
+    <association property="type" javaType="Type" columnPrefix="type_">
+      <id property="id" column="id"/>
+      <result property="name" column="name"/>
+    </association>
+    <association property="user" javaType="User" columnPrefix="user_">
+      <id property="id" column="id"/>
+      <result property="nickname" column="nickname"/>
+      <result property="username" column="username"/>
+      <result property="email" column="email"/>
+      <result property="avatar" column="avatar"/>
+    </association>
+    <collection property="tags" ofType="Tag" columnPrefix="tag_">
+      <id property="id" column="id"/>
+      <result property="name" column="name"/>
+    </collection>
+  </resultMap>
+  <sql id="Base_Column_List">
+    b.id, b.title, b.content, b.first_picture, b.flag, b.views, b.apperation, b.share_statement, b.commentalbled,
+    b.published, b.create_time, b.update_time, b.type_id, b.user_id,b.tag_ids,b.description
+  </sql>
+  <select id="getBlogById" parameterType="java.lang.Long" resultMap="blog">
+    select
+    <include refid="Base_Column_List"/>
+    from t_blog b
+    where b.id = #{id}
+  </select>
+
+  <select id="getAllBlog" resultMap="blog">
+    SELECT
+      b.id,b.title,b.flag,b.update_time,b.type_id,b.published
+         ,t.name type_name
+    FROM t_blog b,t_type t
+    WHERE b.type_id = t.id
+  </select>
+
+  <insert id="saveBlogAndTag"  useGeneratedKeys="true">
+    insert into t_blog_tags (blog_id,tag_id) values (#{blogId},#{tagId})
+  </insert>
+
+
+  <sql id="search_blog">
+    <where>
+      <if test="typeId!=null">
+        and type_id = #{typeId}
+      </if>
+      <if test="title!=null">
+        and title like concat("%",#{title},"%")
+      </if>
+    </where>
+
+  </sql>
+  <select id="searchAllBlogs" resultMap="blog">
+    <bind name="pattern" value="'%' + title + '%'" />    /*模糊查询*/
+    select b.id, b.title, b.update_time,  b.published, b.type_id, t.id, t.name
+    from t_blog b ,t_type t
+    <where>
+      <if test="1 == 1">
+        b.type_id = t.id    /*博客类型id=类型id*/
+      </if>
+      <if test="typeId != null">
+        and b.type_id = #{typeId}       /*根据博客类型查询*/
+      </if>
+      <if test="title != null">
+        and b.title like #{pattern}   /*根据博客title模糊查询*/
+      </if>
+    </where>
+  </select>
+  <select id="getIndexBlog" resultType="com.peak.pojo.Blog" resultMap="blog">
+    select b.id,b.title,b.description,b.first_picture,b.views,b.update_time,t.id type_id,t.name type_name,
+    u.nickname user_nickname,u.avatar user_avatar
+    from t_blog b,t_type t, t_user u
+    where b.user_id = u.id and b.type_id = t.id order by b.update_time desc
+  </select>
+  <select id="getBlogCount" resultType="java.lang.Integer">
+    select count(*) from t_blog;
+  </select>
+
+  <select id="getSearchBlog" resultMap="blog">
+   <bind name="pattern" value="'%'+query+'%'"/>
+    select b.id,b.title,b.description,b.first_picture,b.views,b.create_time,b.update_time,t.id type_id,t.name type_name,
+           u.nickname user_nickname,u.avatar user_avatar
+    from t_blog b,t_type t, t_user u
+    where b.user_id = u.id and b.type_id = t.id and (b.title like #{pattern} or b.content like #{pattern})
+    order by b.update_time desc
+  </select>
+  <select id="getDetailedBlog" resultMap="blog">
+        select b.id,b.first_picture,b.title,b.flag,b.content,b.update_time,b.views,b.apperation,b.share_statement,
+               b.commentalbled,u.id user_id,u.nickname user_nickname,u.avatar user_avatar,t.id tag_id,t.name tag_name
+        from t_blog b,t_tag t,t_user u,t_blog_tags tb
+        where b.user_id = u.id and b.id = tb.blog_id and tb.tag_id = t.id and b.id = #{id}
+  </select>
+  <select id="getBlogByTypeId" resultMap="blog">
+    SELECT b.id,b.title,b.description,b.first_picture,b.views,b.update_time,t.id type_id,t.name type_name,
+           u.nickname user_nickname,u.avatar user_avatar
+    FROM t_blog b,t_type t, t_user u
+    WHERE b.user_id = u.id AND b.type_id = t.id AND t.id=#{id} ORDER BY b.update_time DESC
+
+  </select>
+    <select id="getBlogByTagId" resultMap="blog">
+      SELECT b.id,b.title,b.description,b.first_picture,b.views,b.update_time,t.id type_id,t.name type_name,
+             u.nickname user_nickname,u.avatar user_avatar,tag.name tag_name
+      FROM t_blog b,t_type t,t_user u,t_tag tag,t_blog_tags bt
+        WHERE b.user_id = u.id AND b.type_id = t.id AND bt.tag_id = tag.id
+            AND bt.blog_id = b.id AND tag.id = #{id}
+             ORDER BY b.update_time DESC
+    </select>
+
+    <delete id="deleteBlog" parameterType="java.lang.Long">
+    delete from t_blog
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteBlogAndTag">
+    delete from t_blog_tags where blog_id = #{id}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="Blog" useGeneratedKeys="true">
+    insert into t_blog (title,content,first_picture,flag,views,apperation,share_statement,commentalbled
+    ,published,create_time,update_time,type_id,user_id,tag_ids,description)
+    values (#{title},#{content},#{firstPicture},#{flag},#{views},#{apperation},#{shareStatement},#{commentalbled}
+    ,#{published},#{createTime},#{updateTime},#{type.id},#{user.id},#{tagIds},#{description})
+  </insert>
+
+
+  <update id="updateBlog" parameterType="com.peak.pojo.Blog">
+    update t_blog
+    set title = #{title},content =#{content},first_picture = #{firstPicture},flag = #{flag},
+        apperation=#{apperation},share_statement = #{shareStatement},
+        published=#{published},update_time=#{updateTime},type_id=#{type.id},user_id=#{user.id},
+        tag_ids=#{tagIds},commentalbled=#{commentalbled},description=#{description}
+    where id = #{id}
+  </update>
+
+</mapper>

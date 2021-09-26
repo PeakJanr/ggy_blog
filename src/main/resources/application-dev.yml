@@ -1,0 +1,27 @@
+spring:   #配置数据源
+  datasource:
+    url: jdbc:mysql://localhost:3306/ggy_blog?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=GMT%2B8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml #设置mybaits核心配置文件所在位置
+  type-aliases-package: com.peak.pojo #配置别名
+
+
+pagehelper:                #分页插件
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params:
+
+
+logging: #配置日志级别
+  level:
+    root: info
+    com.peak.dao : debug
+
+  file:
+    path: log/blog-dev.log #生成日志位置

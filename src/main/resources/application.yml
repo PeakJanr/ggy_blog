@@ -1,0 +1,6 @@
+spring:            #全局配置
+  thymeleaf:
+    cache: false
+    mode: html
+  profiles:
+    active: dev

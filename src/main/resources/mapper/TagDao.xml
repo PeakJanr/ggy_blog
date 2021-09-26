@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.peak.dao.TagDao">
+  <resultMap id="tags" type="com.peak.pojo.Tag">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <collection property="blogs" ofType="Blog" columnPrefix="blog_">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+    </collection>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, `name`
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="tags">
+    select 
+    <include refid="Base_Column_List" />
+    from t_tag
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+    <select id="findAll" resultType="com.peak.pojo.Tag">
+      select * from t_tag
+    </select>
+
+    <select id="getIndexTags" resultMap="tags">
+      SELECT t.id,t.name,b.id blog_id,b.title blog_title
+        FROM t_blog b,t_tag t,t_blog_tags tb
+         WHERE t.id = tb.tag_id AND tb.blog_id = b.id
+    </select>
+    <select id="getBlogTag" resultMap="tags">
+      SELECT t.id,t.name,b.id blog_id,b.title blog_title
+      FROM t_blog b,t_tag t,t_blog_tags tb
+      WHERE t.id = tb.tag_id AND tb.blog_id = b.id
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_tag
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.peak.pojo.Tag" useGeneratedKeys="true">
+    insert into t_tag (`name`)
+    values (#{name,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.peak.pojo.Tag" useGeneratedKeys="true">
+    insert into t_tag
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="name != null">
+        `name`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.peak.pojo.Tag">
+    update t_tag
+    <set>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.peak.pojo.Tag">
+    update t_tag
+    set `name` = #{name,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

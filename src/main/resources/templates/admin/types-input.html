@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/_fragment :: head(~{::title})">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客管理</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+  <link rel="stylesheet" href="../../static/css/me.css">
+</head>
+<body>
+<!--头部导航-->
+
+  <!--导航-->
+  <nav th:replace="admin/_fragment :: menu(2)" class="ui inverted attached segment m-padded-tb-mini m-shadow-small" >
+
+  </nav>
+  <div class="ui attached pointing menu">
+    <div class="ui container">
+      <div class="right menu">
+        <a href="#" th:href="@{/admin/types/input}" class="steal active item">新增</a>
+        <a href="#" th:href="@{/admin/types}" class="item">列表</a>
+      </div>
+    </div>
+  </div>
+
+<!--中间内容-->
+<div  class="m-container m-padded-tb-big">
+  <div class="ui container">                         <!--如果没id，则进行新增，若有id，则进行更新-->
+    <form action="#" th:object="${type}" method="post" th:action="*{id}==null ? @{/admin/types/insert}:@{/admin/types/update/{id}(id=*{id})}" class="ui form">
+      <input type="hidden" name="id">
+      <div class="required field">
+        <div class="ui left labeled input">
+          <label class="ui teal basic label">名称</label>
+          <input type="text" name="name" th:value="*{name}" placeholder="分类名称">
+        </div>
+      </div>
+
+      <div class="ui error message"></div> <!--显示错误信息-->
+
+      <div class="ui negetive message" th:unless="${#strings.isEmpty(msg)}">
+        <i class="close icon"></i>
+        <div class="header">验证失败：</div>
+        <p th:text="${msg}">对不起，操作失败！</p>
+      </div>
+
+      <div class="ui right aligned container">
+        <button type="button" class="ui button" onclick="window.history.go(-1)">返回</button>
+        <button type="submit" id="save-btn" class="ui secondary submit button">提交</button>
+      </div>
+    </form>
+  <br>
+  <br>
+    <br>
+    <br>
+
+<!--底部footer-->
+<footer th:replace="admin/_fragment :: footer">
+
+</footer>
+
+<th:block th:replace="admin/_fragment :: script">
+
+</th:block>
+
+  <script>
+    $('.menu.toggle').click(function () {
+      $('.m-item').toggleClass('m-mobile-hide');
+    });
+
+    $('.ui.dropdown').dropdown({
+      on : 'hover'
+    });
+
+  </script>
+</body>
+</html>
